@@ -1,0 +1,52 @@
+--- FILE: chat_window.html ---
+<!-- This is a template file. It will be injected into the page. -->
+<div id="gemini-popup-container">
+  <div id="gemini-popup-content">
+    
+    <!-- Toolbar -->
+    <div id="gemini-popup-toolbar">
+      <div class="toolbar-left-group">
+        <button class="gemini-toolbar-btn js-clear-chat" title="Clear Chat">
+          <svg viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+        <button class="gemini-toolbar-btn js-capture-area" title="Capture area">📷</button>
+        <div id="gemini-model-display-container">
+          <div id="gemini-model-display">
+            <span></span>
+          </div>
+          <form id="gemini-model-form" class="gemini-hidden">
+            <select id="gemini-model-select-popup" style="width: 100%; margin-bottom: 10px;"></select>
+            <button type="submit" style="width: 100%;">Save & Retry</button>
+          </form>
+        </div>
+      </div>
+      <div class="toolbar-right-group">
+        <div class="opacity-control">
+          <label for="gemini-opacity-slider">Opacity:</label>
+          <input type="range" id="gemini-opacity-slider" min="0.2" max="1" step="0.05">
+        </div>
+        <button class="gemini-toolbar-btn js-minimize" title="Minimize">−</button>
+        <button class="gemini-toolbar-btn js-close" title="Close">×</button>
+      </div>
+    </div>
+    
+    <!-- Chat Log -->
+    <div id="gemini-chat-log"></div>
+    
+    <!-- Input Form Area -->
+    <div id="gemini-chat-form-container">
+      <div id="gemini-reply-context" class="gemini-hidden">
+        <span id="gemini-reply-text"></span>
+        <button id="gemini-cancel-reply-btn" title="Cancel Reply">×</button>
+      </div>
+      <form id="gemini-chat-form">
+        <input id="gemini-chat-input" type="text" placeholder="Ask a follow-up..." autocomplete="off">
+        <button id="gemini-chat-send" type="submit">➤</button>
+      </form>
+    </div>
+
+  </div>
+  
+  <!-- Minimized Bubble (now empty, styled by CSS) -->
+  <div id="gemini-minimized-bubble" class="gemini-hidden" title="Restore"></div>
+</div>

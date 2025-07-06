@@ -1,0 +1,71 @@
+
+/* ui_styles.css - v6 (Custom Bubble Icon) */
+
+/* General, Toolbar, Model Dropdown, Opacity Slider... (All Unchanged) */
+#gemini-popup-content, #gemini-popup-content button, #gemini-popup-content input, #gemini-popup-content select { font-family: "Google Sans", "Helvetica Neue", Arial, sans-serif; }
+#gemini-popup-content { background-color: #f8f9fa; }
+#gemini-popup-toolbar { background-color: #ffffff; border-bottom: 1px solid #dadce0; padding: 4px 8px; display: flex; align-items: center; min-height: 48px; cursor: move; }
+.toolbar-left-group, .toolbar-right-group { display: flex; align-items: center; }
+.toolbar-right-group { margin-left: auto; }
+.gemini-toolbar-btn { color: #5f6368; transition: background-color 0.2s ease; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 8px; box-sizing: border-box; }
+.gemini-toolbar-btn:hover { background-color: #f1f3f4; }
+.gemini-toolbar-btn svg { width: 100%; height: 100%; fill: #5f6368; }
+#gemini-model-display-container { position: relative; margin: 0 8px; }
+#gemini-model-display { display: flex; align-items: center; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #3c4043; cursor: pointer; transition: background-color 0.2s ease; border: 1px solid transparent; }
+#gemini-model-display:hover { background-color: #f1f3f4; }
+#gemini-model-display.active { background-color: #e8f0fe; border-color: #d2e3fc; }
+#gemini-model-display::after { content: '▾'; font-size: 16px; margin-left: 8px; color: #5f6368; }
+#gemini-model-form { position: absolute; top: 100%; left: 0; margin-top: 4px; background-color: #ffffff; border: 1px solid #dadce0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px; z-index: 10; width: 250px; }
+.opacity-control { display: flex; align-items: center; padding: 0 8px; }
+.opacity-control label { color: #5f6368; font-size: 13px; margin-right: 8px; }
+
+/* Chat Log & Messages (Unchanged) */
+#gemini-chat-log { padding: 16px; background-color: #ffffff; }
+.gemini-message { padding: 12px 16px; padding-bottom: 36px; border-radius: 20px; line-height: 1.5; font-size: 15px; max-width: 95%; position: relative; margin-bottom: 12px; }
+.user-message { background-color: #e8f0fe; color: #174ea6; border-bottom-right-radius: 4px; margin-left: auto; }
+.model-message { background-color: #f1f3f4; color: #202124; border-bottom-left-radius: 4px; margin-right: auto; }
+.gemini-message-action-btn { position: absolute; bottom: 6px; width: 28px; height: 28px; border-radius: 50%; border: none; background-color: transparent; color: #5f6368; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; opacity: 0; transition: opacity 0.2s ease, background-color 0.2s ease; pointer-events: none; }
+.gemini-message:hover .gemini-message-action-btn { opacity: 1; pointer-events: auto; }
+.gemini-message-action-btn:hover { background-color: #d8dbdf; }
+.gemini-copy-btn { right: 8px; }
+.gemini-reply-btn { right: 40px; } 
+.gemini-copy-btn.copied { background-color: #d1e7dd; color: #1e8e3e; }
+
+/* Input Form & Reply Context (Unchanged) */
+#gemini-chat-form-container { background-color: #ffffff; padding: 0 16px 12px 16px; border-top: 1px solid #dadce0; }
+#gemini-chat-form { padding: 0; border: none; }
+#gemini-chat-input { background-color: #f1f3f4; border: 1px solid transparent; transition: background-color 0.2s ease, border-color 0.2s ease; }
+#gemini-chat-input:focus { background-color: #ffffff; border-color: #1a73e8; }
+#gemini-chat-send { background-color: #1a73e8; transition: background-color 0.2s ease; }
+#gemini-chat-send:hover { background-color: #185abc; }
+#gemini-reply-context { padding: 8px 12px; background-color: #f1f3f4; border-left: 3px solid #1a73e8; font-size: 13px; color: #5f6368; display: flex; align-items: center; justify-content: space-between; margin: 12px 0; border-radius: 6px; }
+#gemini-reply-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#gemini-cancel-reply-btn { border: none; background: transparent; font-size: 20px; color: #5f6368; cursor: pointer; padding: 0 4px; }
+
+/* Toast Indicator (Unchanged) */
+#gemini-toast-indicator { position: fixed; bottom: 20px; right: 20px; background-color: #3c4043; color: #e8eaed; padding: 12px 20px; border-radius: 24px; font-family: "Google Sans", "Helvetica Neue", Arial, sans-serif; font-size: 14px; font-weight: 500; z-index: 2147483647; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
+#gemini-toast-indicator.visible { opacity: 1; transform: translateY(0); }
+
+/* **** MINIMIZED BUBBLE STYLE MODIFIED **** */
+#gemini-minimized-bubble {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+  transition: transform 0.2s ease;
+  
+  /* Set the new icon as the background */
+  background-image: url('chrome-extension://__MSG_@@extension_id__/icons/bubble_icon.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent; /* Ensure no other color interferes */
+}
+#gemini-minimized-bubble:hover {
+  transform: scale(1.1);
+}

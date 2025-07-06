@@ -1,0 +1,52 @@
+
+{
+  "manifest_version": 3,
+  "name": "ChatQuick",
+  "version": "2.2.0",
+  "description": "Your everyday companion for effortless conversations with ChatQuick. Get quick answers, generate ideas, and stay productive with a simplified, intuitive chat experience.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "scripting",
+    "activeTab",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+   "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "ask-gemini-shortcut": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+H",
+        "mac": "Command+Shift+H"
+      },
+      "description": "Ask Gemini about the selected text"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ 
+        "chat_window.html", 
+        "chat_window_logic.js",
+        "popup.css",
+        "ui_styles.css",
+        "libs/marked.min.js",
+        "libs/purify.min.js",
+        "libs/bootstrap.min.css",
+        "icons/bubble_icon.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

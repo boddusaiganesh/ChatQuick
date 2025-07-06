@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gemini Extension Options</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: 20px auto; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; }
+    h1 { color: #333; }
+    label { display: block; margin-top: 20px; margin-bottom: 5px; font-weight: bold; }
+    input[type="password"], select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: sans-serif; }
+    textarea { resize: vertical; min-height: 80px; }
+    select { background-color: white; }
+    button { margin-top: 20px; padding: 10px 15px; background-color: #4285f4; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #357ae8; }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    #status { margin-top: 15px; color: green; font-weight: bold; }
+    .help-text { font-size: 12px; color: #555; font-weight: normal; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Gemini Extension Settings</h1>
+  <a href="history.html" target="_blank" style="float: right;">View Query History</a>
+  <p>You need a Google Gemini API key. You can get one from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.</p>
+  
+  <label for="api-key">Gemini API Key:</label>
+  <input type="password" id="api-key" placeholder="Enter your API Key">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 30px;">
+    <label for="model-select" style="margin: 0;">Default Gemini Model:</label>
+    <button id="refresh-models" style="padding: 5px 10px; font-size: 12px; margin: 0;">Refresh List</button>
+  </div>
+  <select id="model-select"></select>
+
+  <label for="custom-prompt">Custom Prompt Template:</label>
+  <textarea id="custom-prompt"></textarea>
+  <p class="help-text">Use <b>{{text}}</b> as a placeholder for your selected text. Example: "Summarize this for a 5th grader: {{text}}"</p>
+  
+  <div style="margin-top: 30px; display: flex; align-items: center;">
+    <input type="checkbox" id="stealth-mode" style="width: auto; margin-right: 10px;">
+    <label for="stealth-mode" style="margin: 0; font-weight: normal;">Enable "Stealth Mode" for minimized bubble</label>
+  </div>
+  
+  <div style="margin-top: 15px; display: flex; align-items: center;">
+    <input type="checkbox" id="show-toast-indicator" style="width: auto; margin-right: 10px;">
+    <label for="show-toast-indicator" style="margin: 0; font-weight: normal;">Show "Asking Gemini..." indicator on request</label>
+  </div>
+
+  <!-- **** NEW CHECKBOX ADDED HERE **** -->
+  <div style="margin-top: 15px; display: flex; align-items: center;">
+    <input type="checkbox" id="hide-on-minimize" style="width: auto; margin-right: 10px;">
+    <label for="hide-on-minimize" style="margin: 0; font-weight: normal;">Completely hide window when minimized (re-open with shortcut)</label>
+  </div>
+  
+  <button id="save">Save</button>
+  <div id="status"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>
