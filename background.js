@@ -9,16 +9,48 @@ import { showToastIndicator, removeToastIndicator } from './modules/toast.js';
 
 // --- HELPER TO INJECT AND RUN THE CHAT WINDOW ---
 async function showChatWindow(tabId, history, isModelProblem = false) {
-    // This function is unchanged
-    await chrome.scripting.executeScript({ target: { tabId }, func: () => { const e=document.getElementById("gemini-popup-container");e&&e.remove() } });
+    // 1. Check if the UI already exists and remove it to prevent duplicates
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        func: () => {
+            const oldContainer = document.getElementById('gemini-popup-container');
+            if (oldContainer) oldContainer.remove();
+        }
+    });
+
+    // 2. Fetch the HTML template
     const templateURL = chrome.runtime.getURL('chat_window.html');
     const response = await fetch(templateURL);
     const htmlTemplate = await response.text();
+
+    // 3. Inject the CSS and the HTML template
     await chrome.scripting.insertCSS({ target: { tabId }, files: ["libs/bootstrap.min.css", "popup.css", "ui_styles.css"] });
-    await chrome.scripting.executeScript({ target: { tabId }, func: (html) => { document.body.insertAdjacentHTML('beforeend', html); }, args: [htmlTemplate] });
-    await chrome.scripting.executeScript({ target: { tabId }, files: ['libs/purify.min.js', 'libs/marked.min.js'] });
-    await chrome.scripting.executeScript({ target: { tabId }, files: ['chat_window_logic.js'] });
-    await chrome.scripting.executeScript({ target: { tabId }, func: (h, p) => { document.dispatchEvent(new CustomEvent('gemini-init-chat-window', { detail: { initialHistory: h, isModelProblem: p } })) }, args: [history, isModelProblem] });
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (html) => { document.body.insertAdjacentHTML('beforeend', html); },
+        args: [htmlTemplate]
+    });
+    
+    // 4. Inject the logic libraries and script
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['libs/purify.min.js', 'libs/marked.min.js']
+    });
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['chat_window_logic.js']
+    });
+
+    // 5. Dispatch a custom event with the necessary data
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (history, isModelProblem) => {
+            document.dispatchEvent(new CustomEvent('gemini-init-chat-window', {
+                detail: { initialHistory: history, isModelProblem }
+            }));
+        },
+        args: [history, isModelProblem]
+    });
 }
 
 // --- EVENT LISTENERS ---
@@ -26,14 +58,11 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "gemini-query", title: 'Ask Gemini about "%s"', contexts: ["selection"] });
 });
 
-// **** THIS IS THE FIX ****
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  // Add a check to ensure we are not on a restricted page.
-  if (tab.url.startsWith('chrome://')) {
+  if (tab.url?.startsWith('chrome://')) {
     console.log("Cannot run on a chrome:// page.");
     return;
   }
-
   if (info.menuItemId === "gemini-query" && info.selectionText) {
     const { showToastIndicator: shouldShowToast } = await chrome.storage.sync.get({ showToastIndicator: true });
     if (shouldShowToast) {
@@ -43,14 +72,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-// **** THIS IS THE FIX ****
 chrome.commands.onCommand.addListener(async (command, tab) => {
-  // Add a check to ensure we are not on a restricted page.
-  if (tab.url.startsWith('chrome://')) {
+  if (tab.url?.startsWith('chrome://')) {
     console.log("Cannot run on a chrome:// page.");
     return;
   }
-  
   if (command === "ask-gemini-shortcut") {
     const { showToastIndicator: shouldShowToast } = await chrome.storage.sync.get({ showToastIndicator: true });
     if (shouldShowToast) {
@@ -60,7 +86,6 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
       target: { tabId: tab.id },
       func: () => window.getSelection().toString(),
     }, async (injectionResults) => {
-      // Check if the script execution failed (e.g., on a restricted page)
       if (chrome.runtime.lastError) {
           console.log(`Error executing script: ${chrome.runtime.lastError.message}`);
           return;
@@ -77,7 +102,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
   }
 });
 
-// The rest of the file is unchanged.
+// **** MESSAGE LISTENER WITH THE FIX ****
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'geminiFollowUp') {
     handleFollowUp(message.history, message.imageData)
@@ -87,25 +112,57 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const isModelError = !isRateLimit && /model/i.test(error.message);
         sendResponse({ success: false, error: error.message, isModelProblem: isRateLimit || isModelError });
       });
-    return true;
+    return true; // Indicates an async response
   }
+  
   if (message.type === 'saveModelAndRetry') {
-    chrome.storage.sync.set({ selectedModel: message.newModel }).then(() => {
-      const lastUserEntry = message.history.findLast(m => m.role === 'user');
-      if (lastUserEntry) {
-        processNewQuery(lastUserEntry.parts[0].text, sender.tab, true);
-      }
-    });
-    return true;
+    // Wrap in an async IIFE to use await
+    (async () => {
+        await chrome.storage.sync.set({ selectedModel: message.newModel });
+        const lastUserEntry = message.history.findLast(m => m.role === 'user');
+        if (!lastUserEntry) return;
+
+        // 1. Prioritize the tab from the sender.
+        let targetTab = sender.tab;
+
+        // 2. If sender.tab is missing, query for the currently active tab as a fallback.
+        if (!targetTab) {
+            console.log("sender.tab not found, querying for active tab.");
+            const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+            targetTab = tabs[0];
+        }
+
+        // 3. If we successfully found a tab, proceed.
+        if (targetTab) {
+            processNewQuery(lastUserEntry.parts[0].text, targetTab, true);
+        } else {
+            console.error("Could not find a target tab to retry the query on.");
+        }
+    })();
+    return true; // Indicates an async response
   }
-  if (message.type === 'fetchModels') { listAvailableModels().then(models => sendResponse({ success: true, models })).catch(err => sendResponse({ success: false, error: err.message })); return true; }
+
+  if (message.type === 'fetchModels') { 
+    listAvailableModels()
+      .then(models => sendResponse({ success: true, models: models }))
+      .catch(err => sendResponse({ success: false, error: err.message })); 
+    return true; // Indicates an async response
+  }
+  
   if (message.type === 'clearChatHistory') { clearCurrentConversation(); }
   if (message.type === 'initiateCapture') { handleCaptureRequest(sender.tab); }
   if (message.type === 'captureComplete') { handleCaptureComplete(message.area, sender.tab, message.devicePixelRatio); }
   if (message.type === 'cropComplete') { handleCropComplete(message.imageData); }
 });
 
+// --- CORE LOGIC WORKFLOWS ---
 async function processNewQuery(promptText, tab, isRetry = false) {
+  // Defensive check for a valid tab object
+  if (!tab || typeof tab.id === 'undefined') {
+    console.error("processNewQuery called with an invalid tab object.", tab);
+    return;
+  }
+
   try {
     const data = await chrome.storage.local.get({ conversationHistory: [] });
     let history = data.conversationHistory;
@@ -136,8 +193,7 @@ async function processNewQuery(promptText, tab, isRetry = false) {
 
   } catch (error) {
     console.error("Error during query:", error);
-    // Add a guard here to avoid trying to inject into a restricted page on error
-    if (tab.url.startsWith('chrome://')) {
+    if (tab.url?.startsWith('chrome://')) {
         console.error("Cannot show error UI on a chrome:// page.");
         return;
     }
